@@ -1,0 +1,20 @@
+# NextAuth Configuration
+NEXTAUTH_SECRET=your_nextauth_secret_key_here
+NEXTAUTH_URL=http://localhost:3000
+
+# Sanity Configuration
+NEXT_PUBLIC_SANITY_PROJECT_ID=your_sanity_project_id
+NEXT_PUBLIC_SANITY_DATASET=production
+SANITY_API_TOKEN=your_sanity_api_token
+
+# Email Configuration
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
+SMTP_FROM=noreply@ra9iacollection.com
+
+# Telegram Bot Configuration (if applicable)
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_telegram_chat_id
