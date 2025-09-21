@@ -1,9 +1,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
-import { ChevronRight, Heart, Minus, Plus, ShoppingCart, Star } from "lucide-react"
+import { ChevronRight, Minus, Plus, ShoppingCart } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/lib/utils"
 import { SiteHeader } from "@/app/components/site-header"
 import { SiteFooter } from "@/app/components/site-footer"
 import { getPartnerBySlug, getPartnerProducts } from "@/lib/sanity/queries"
@@ -101,13 +102,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="grid gap-8 md:grid-cols-2">
               {/* Product Images */}
               <div className="space-y-4">
-                <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted">
                   {product.imageUrl ? (
                     <Image
                       src={product.imageUrl}
                       alt={product.name}
-                      width={600}
-                      height={600}
+                      fill
                       className="object-cover"
                       priority
                     />
@@ -115,8 +115,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     <Image
                       src={urlFor(product.images[0]).url()}
                       alt={product.name}
-                      width={600}
-                      height={600}
+                      fill
                       className="object-cover"
                       priority
                     />
@@ -131,12 +130,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.images && product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
                     {product.images.slice(0, 4).map((image, index) => (
-                      <div key={index} className="aspect-square overflow-hidden rounded-md border bg-muted">
+                      <div key={index} className="relative aspect-[3/4] overflow-hidden rounded-md border bg-muted">
                         <Image
                           src={urlFor(image).url()}
                           alt={`${product.name} - Image ${index + 1}`}
-                          width={150}
-                          height={150}
+                          fill
                           className="object-cover"
                         />
                       </div>
@@ -149,20 +147,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold">{product.name}</h1>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-0.5">
-                      {Array(5).fill(0).map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`h-5 w-5 ${i < Math.round(product.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                        />
-                      ))}
-                      <span className="ml-2 text-sm text-muted-foreground">
-                        {product.reviewCount ? `(${product.reviewCount} reviews)` : '(No reviews yet)'}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-3xl font-bold">${product.price}</p>
+                  
+                  <p className="text-3xl font-bold">{formatCurrency(product.price, 'ETB')}</p>
                 </div>
 
                 <div className="space-y-4">
@@ -263,10 +249,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       Add to Cart
                     </Button>
-                    <Button variant="outline" size="icon" className="h-10 w-10">
-                      <Heart className="h-5 w-5" />
-                      <span className="sr-only">Add to Wishlist</span>
-                    </Button>
+                    
                     <Button className="bg-green-600 hover:bg-green-700 text-white flex-1">
                       Quick Order via Telegram
                     </Button>
@@ -323,21 +306,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     href={`/partners/${params.slug}/products/${relatedProduct.slug.current}`}
                     className="group"
                   >
-                    <div className="aspect-square overflow-hidden rounded-lg bg-muted">
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
                       {relatedProduct.imageUrl ? (
                         <Image
                           src={relatedProduct.imageUrl}
                           alt={relatedProduct.name}
-                          width={300}
-                          height={300}
+                          fill
                           className="object-cover transition-transform group-hover:scale-105"
                         />
                       ) : relatedProduct.images && relatedProduct.images.length > 0 ? (
                         <Image
                           src={urlFor(relatedProduct.images[0]).url()}
                           alt={relatedProduct.name}
-                          width={300}
-                          height={300}
+                          fill
                           className="object-cover transition-transform group-hover:scale-105"
                         />
                       ) : (
@@ -348,7 +329,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     </div>
                     <div className="mt-2">
                       <h3 className="font-medium line-clamp-1">{relatedProduct.name}</h3>
-                      <p className="text-sm text-muted-foreground">${relatedProduct.price}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(relatedProduct.price, 'ETB')}</p>
                     </div>
                   </Link>
                 ))}

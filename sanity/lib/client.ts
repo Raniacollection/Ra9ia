@@ -1,11 +1,24 @@
 import { createClient as createSanityClient } from "next-sanity"
 import imageUrlBuilder from "@sanity/image-url"
 
-const token = "skeLJ3xeZGW6sPKerZsD8QTY8Jjz8sK12ULebcMnPSroBpdSZppyEaUYKPV9cCavArqDp0UmQyJSF4rc57cxq7ViiHi3giTNOZjz5SV8tNTaPChmam9MV0McpkFg4FXi4xlu4OMYAIULIvLjCkj1CU0o9nr73FtFlwyjQfKw586rnzcTJcmy"
+const projectId =
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
+  process.env.SANITY_PROJECT_ID ||
+  "o3e5wr0n"
+
+const dataset =
+  process.env.NEXT_PUBLIC_SANITY_DATASET ||
+  process.env.SANITY_DATASET ||
+  "production"
+
+const token =
+  process.env.SANITY_API_READ_TOKEN ||
+  process.env.NEXT_PUBLIC_SANITY_TOKEN ||
+  undefined
 
 export const client = createSanityClient({
-  projectId: "o3e5wr0n",
-  dataset: "production",
+  projectId,
+  dataset,
   apiVersion: "2024-03-02",
   useCdn: false,
   token,
@@ -20,10 +33,10 @@ export function urlFor(source: any) {
 // Export a function to create a new client instance (for API routes)
 export function createClient() {
   return createSanityClient({
-    projectId: "o3e5wr0n",
-    dataset: "production",
+    projectId,
+    dataset,
     apiVersion: "2024-03-02",
     useCdn: false,
     token,
   })
-} 
+}

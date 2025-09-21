@@ -38,7 +38,7 @@ export function NewsletterSignup() {
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
-              <h2 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl text-ra9ia-900">
+              <h2 className="text-3xl font-serif font-semibold tracking-tight sm:text-4xl md:text-5xl text-ra9ia-900">
                 Subscribe to Our Newsletter
               </h2>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
@@ -95,7 +95,7 @@ export function NewsletterSignup() {
           </div>
           <div className="relative h-[400px] overflow-hidden rounded-xl">
             <Image
-              src="/placeholder.svg?height=800&width=600"
+              src="/images/hero.png"
               alt="Newsletter subscription"
               fill
               className="object-cover"

@@ -1,19 +1,21 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { Cormorant_Garamond } from "next/font/google"
+import { Fraunces } from "next/font/google"
+
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 import { CartProvider } from "./contexts/cart-context"
 import { WishlistProvider } from "./contexts/wishlist-context"
 import { Providers } from "./providers"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", weight: ["300","400","500","600"], display: "swap" })
 
-const cormorant = Cormorant_Garamond({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-serif",
+  weight: ["400","500","600","700"],
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -29,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${fraunces.variable} font-serif antialiased`}>
         <ThemeProvider 
           attribute="class" 
           defaultTheme="light" 
@@ -48,7 +50,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

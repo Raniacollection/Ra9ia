@@ -15,6 +15,19 @@ SMTP_USER=your_smtp_username
 SMTP_PASSWORD=your_smtp_password
 SMTP_FROM=noreply@ra9iacollection.com
 
-# Telegram Bot Configuration (if applicable)
+# Telegram Configuration (if applicable)
+# Username used to open a chat when the user clicks "Continue on Telegram"
+NEXT_PUBLIC_TELEGRAM_USERNAME=your_telegram_username_without_at
+
+# If sending messages via a bot (server or client usage depending on implementation)
+# Note: values with NEXT_PUBLIC_ are exposed to the client. Prefer server-only when possible.
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_CHAT_ID=your_telegram_chat_id
+NEXT_PUBLIC_TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+NEXT_PUBLIC_TELEGRAM_CHAT_ID=your_telegram_chat_id
+
+# Instagram (optional Social Feed)
+# Use Instagram Basic Display API (client-side) with a long-lived user token and user id
+NEXT_PUBLIC_INSTAGRAM_ACCESS_TOKEN=your_instagram_long_lived_access_token
+NEXT_PUBLIC_INSTAGRAM_USER_ID=your_instagram_user_id
+NEXT_PUBLIC_INSTAGRAM_USERNAME=your_instagram_username_without_at

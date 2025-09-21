@@ -5,10 +5,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { useMessagingSettings } from "@/hooks/use-messaging"
+import { DEFAULT_TELEGRAM_USERNAME, generateTelegramChatLink } from "@/lib/telegram"
 
-// Business contact info
-const BUSINESS_WHATSAPP = "1234567890"; // Replace with your actual WhatsApp number
-const BUSINESS_TELEGRAM = "onlll4"; // Telegram username
+// Fallbacks if settings are not configured
+const FALLBACK_TELEGRAM = DEFAULT_TELEGRAM_USERNAME
 
 interface PartnerApplicationData {
   firstName: string;
@@ -28,7 +30,9 @@ interface PartnerApplicationModalProps {
 }
 
 export function PartnerApplicationModal({ isOpen, onClose, applicationData }: PartnerApplicationModalProps) {
-  const [contactMethod, setContactMethod] = React.useState("");
+  const [contactMethod, setContactMethod] = React.useState<'whatsapp' | 'telegram' | ''>("")
+  const [applicantHandle, setApplicantHandle] = React.useState("")
+  const { messaging } = useMessagingSettings()
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -68,13 +72,21 @@ Application Reference: APP-${Date.now().toString().substring(6)}
     `.trim();
 
     // Encode the message for URL
-    const encodedMessage = encodeURIComponent(message);
+    const messageWithHandle = applicantHandle ? `${message}\n\nApplicant handle: ${applicantHandle}` : message
+    const encodedMessage = encodeURIComponent(messageWithHandle);
 
-    // Redirect based on preferred contact method
+    // Redirect based on preferred contact method, using settings
     if (contactMethod === "whatsapp") {
-      window.open(`https://wa.me/${BUSINESS_WHATSAPP}?text=${encodedMessage}`, "_blank");
+      const numberRaw = (messaging.whatsappNumber || '').replace(/[^\d]/g, '')
+      if (!numberRaw) {
+        alert('WhatsApp number is not configured yet. Please set it in Site Settings.')
+      } else {
+        window.open(`https://wa.me/${numberRaw}?text=${encodedMessage}`, "_blank");
+      }
     } else if (contactMethod === "telegram") {
-      window.open(`https://t.me/${BUSINESS_TELEGRAM}?text=${encodedMessage}`, "_blank");
+      const username = messaging.telegramUsername || FALLBACK_TELEGRAM
+      const url = generateTelegramChatLink(username, messageWithHandle)
+      if (url) window.open(url, "_blank")
     }
 
     onClose();
@@ -109,7 +121,7 @@ Application Reference: APP-${Date.now().toString().substring(6)}
             <Label htmlFor="contact-method" className="text-right">
               Contact Via
             </Label>
-            <Select value={contactMethod} onValueChange={setContactMethod}>
+            <Select value={contactMethod} onValueChange={(v: 'whatsapp' | 'telegram') => setContactMethod(v)}>
               <SelectTrigger className="col-span-3 h-9">
                 <SelectValue placeholder="Select messaging app" />
               </SelectTrigger>
@@ -119,7 +131,19 @@ Application Reference: APP-${Date.now().toString().substring(6)}
               </SelectContent>
             </Select>
           </div>
-          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="applicant-handle" className="text-right">
+              {contactMethod === 'telegram' ? 'Your Telegram username' : 'Your WhatsApp number'}
+            </Label>
+            <Input
+              id="applicant-handle"
+              value={applicantHandle}
+              onChange={(e) => setApplicantHandle(e.target.value)}
+              placeholder={contactMethod === 'telegram' ? '@username' : '+251...'}
+              className="col-span-3 h-9"
+            />
+          </div>
+
           <div className="text-sm text-muted-foreground pt-2">
             <p>
               By selecting a contact method, your application will be forwarded directly to our partner relationship team via your chosen platform.

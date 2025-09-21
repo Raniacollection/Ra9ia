@@ -13,24 +13,26 @@
     --popover: 0 0% 100%;
     --popover-foreground: 350 8% 10%;
 
-    --primary: 343 79% 37%;
-    --primary-foreground: 355 100% 97%;
+    /* Deep luxury burgundy */
+    --primary: 343 58% 22%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 345 6% 92%;
-    --secondary-foreground: 340 6% 30%;
+    /* Creamy neutrals for secondary and accents */
+    --secondary: 35 60% 96%;
+    --secondary-foreground: 350 8% 20%;
 
-    --muted: 345 6% 92%;
-    --muted-foreground: 340 6% 45%;
+    --muted: 35 40% 97%;
+    --muted-foreground: 350 8% 40%;
 
-    --accent: 343 79% 97%;
-    --accent-foreground: 343 79% 37%;
+    --accent: 35 55% 95%;
+    --accent-foreground: 343 58% 22%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 343 10% 83%;
     --input: 343 10% 83%;
-    --ring: 343 79% 37%;
+    --ring: 343 58% 22%;
 
     --radius: 0.5rem;
   }
@@ -45,24 +47,24 @@
     --popover: 350 8% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 343 79% 57%;
+    --primary: 343 58% 46%;
     --primary-foreground: 355 100% 97%;
 
-    --secondary: 343 7% 18%;
+    --secondary: 350 7% 18%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 343 7% 18%;
+    --muted: 350 7% 18%;
     --muted-foreground: 345 6% 65%;
 
-    --accent: 343 7% 18%;
-    --accent-foreground: 343 79% 57%;
+    --accent: 350 7% 18%;
+    --accent-foreground: 343 58% 46%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 343 7% 25%;
     --input: 343 7% 25%;
-    --ring: 343 79% 57%;
+    --ring: 343 58% 46%;
   }
 }
 
@@ -71,8 +73,15 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
+
+  /* Luxury heading typography site-wide */
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight text-[color:hsl(var(--foreground))];
+  }
+  h1, h2 { @apply font-semibold; }
+  h3 { @apply font-medium; }
 
   /* Custom styling for Ra9ia Collection */
   .gradient-overlay {

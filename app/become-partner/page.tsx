@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Heart } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -13,9 +12,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { PartnerApplicationModal } from "@/app/components/partner-application-modal"
+import { SiteHeader } from "../components/site-header"
+import { SiteFooter } from "../components/site-footer"
+import { Gem, Globe2, Truck, Megaphone } from "lucide-react"
 
 export default function BecomePartnerPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -40,111 +43,42 @@ export default function BecomePartnerPage() {
     setFormData(prev => ({ ...prev, partnershipModel: value }));
   };
 
+  const validateStep = (step: 1 | 2) => {
+    if (step === 1) {
+      if (!formData.firstName || !formData.lastName || !formData.email) {
+        alert("Please complete your name and email to continue.");
+        return false;
+      }
+    } else {
+      if (!formData.company) {
+        alert("Please provide your company/brand name.");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  const goNext = () => {
+    if (validateStep(1)) setCurrentStep(2)
+  }
+
+  const goBack = () => setCurrentStep(1)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple validation
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.company) {
-      alert("Please fill in all required fields");
-      return;
-    }
-    
-    // Open the modal with the form data
+    if (!validateStep(2)) return;
     setIsModalOpen(true);
   };
   
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6 md:gap-10">
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="font-serif text-2xl font-bold">Ra9ia</span>
-              <span className="font-light">Collection</span>
-            </Link>
-            <nav className="hidden md:flex gap-6">
-              <Link href="/collections" className="text-sm font-medium transition-colors hover:text-primary">
-                Collections
-              </Link>
-              <Link href="/new-arrivals" className="text-sm font-medium transition-colors hover:text-primary">
-                New Arrivals
-              </Link>
-              <Link href="/bestsellers" className="text-sm font-medium transition-colors hover:text-primary">
-                Bestsellers
-              </Link>
-              <Link href="/partners" className="text-sm font-medium transition-colors hover:text-primary">
-                Partner Products
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/search" className="hidden md:flex">
-              <span className="sr-only">Search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-            </Link>
-            <Link href="/wishlist">
-              <span className="sr-only">Wishlist</span>
-              <Heart className="h-5 w-5" />
-            </Link>
-            <Link href="/cart">
-              <span className="sr-only">Cart</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-                <path d="M3 6h18"></path>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            </Link>
-            <Link href="/account" className="hidden md:flex">
-              <span className="sr-only">Account</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
+        <section className="w-full py-14 md:py-20 bg-cream-50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                <h1 className="text-3xl font-serif font-semibold tracking-tight sm:text-4xl md:text-5xl text-ra9ia-900">
                   Become a Partner
                 </h1>
                 <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -160,65 +94,82 @@ export default function BecomePartnerPage() {
               <div>
                 <div className="space-y-6">
                   <div className="space-y-2">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-ra9ia-900/60">Why partner with us</div>
                     <h2 className="text-2xl font-serif font-bold">Partner Benefits</h2>
-                    <p className="text-muted-foreground">
-                      Partnering with Ra9ia Collection offers numerous advantages for your business
+                    <p className="text-muted-foreground max-w-prose">
+                      A premium, minimalist retail presence for your brand — with thoughtful marketing and simplified logistics.
                     </p>
                   </div>
-                  <div className="grid gap-4">
-                    <Card className="border-burgundy-100 hover:border-burgundy-200 transition-colors">
-                      <CardHeader className="bg-burgundy-50/50">
-                        <CardTitle className="text-ra9ia-800">Expanded Reach</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">
-                          Showcase your products to our established customer base of modest fashion enthusiasts across
-                          the globe.
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="border-burgundy-100 hover:border-burgundy-200 transition-colors">
-                      <CardHeader className="bg-burgundy-50/50">
-                        <CardTitle className="text-ra9ia-800">Brand Alignment</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">
-                          Associate your brand with Ra9ia Collection's reputation for quality and elegant modest
-                          fashion.
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="border-burgundy-100 hover:border-burgundy-200 transition-colors">
-                      <CardHeader className="bg-burgundy-50/50">
-                        <CardTitle className="text-ra9ia-800">Simplified Logistics</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">
-                          We handle the online presence while you focus on creating beautiful products. Options for
-                          dropshipping or consignment available.
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="border-burgundy-100 hover:border-burgundy-200 transition-colors">
-                      <CardHeader className="bg-burgundy-50/50">
-                        <CardTitle className="text-ra9ia-800">Marketing Support</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">
-                          Benefit from our marketing efforts, including social media promotion, email campaigns, and
-                          featured partner spotlights.
-                        </p>
-                      </CardContent>
-                    </Card>
+                  <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
+                    {/* Expanded Reach */}
+                    <div className="group relative overflow-hidden rounded-xl border border-burgundy-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                      <div className="absolute inset-0 bg-gradient-to-br from-burgundy-50/40 via-transparent to-cream-50/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="p-5 flex gap-4">
+                        <div className="h-10 w-10 rounded-full bg-ra9ia-50 text-ra9ia-800 flex items-center justify-center ring-1 ring-burgundy-100">
+                          <Globe2 className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-lg tracking-tight text-ra9ia-900">Expanded Reach</h3>
+                          <p className="text-sm text-muted-foreground mt-1">Access an engaged audience of modest fashion customers across Ethiopia and beyond.</p>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute -bottom-10 -right-10 h-28 w-28 rounded-full bg-gradient-to-tr from-burgundy-200/20 to-transparent" />
+                    </div>
+
+                    {/* Brand Alignment */}
+                    <div className="group relative overflow-hidden rounded-xl border border-burgundy-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                      <div className="absolute inset-0 bg-gradient-to-br from-burgundy-50/40 via-transparent to-cream-50/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="p-5 flex gap-4">
+                        <div className="h-10 w-10 rounded-full bg-ra9ia-50 text-ra9ia-800 flex items-center justify-center ring-1 ring-burgundy-100">
+                          <Gem className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-lg tracking-tight text-ra9ia-900">Luxury Positioning</h3>
+                          <p className="text-sm text-muted-foreground mt-1">Present your products within a curated, premium aesthetic that elevates your brand.</p>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute -bottom-10 -right-10 h-28 w-28 rounded-full bg-gradient-to-tr from-burgundy-200/20 to-transparent" />
+                    </div>
+
+                    {/* Simplified Logistics */}
+                    <div className="group relative overflow-hidden rounded-xl border border-burgundy-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                      <div className="absolute inset-0 bg-gradient-to-br from-burgundy-50/40 via-transparent to-cream-50/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="p-5 flex gap-4">
+                        <div className="h-10 w-10 rounded-full bg-ra9ia-50 text-ra9ia-800 flex items-center justify-center ring-1 ring-burgundy-100">
+                          <Truck className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-lg tracking-tight text-ra9ia-900">Simplified Logistics</h3>
+                          <p className="text-sm text-muted-foreground mt-1">We handle storefront and ordering; you focus on product. Dropship or consignment — your choice.</p>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute -bottom-10 -right-10 h-28 w-28 rounded-full bg-gradient-to-tr from-burgundy-200/20 to-transparent" />
+                    </div>
+
+                    {/* Marketing Support */}
+                    <div className="group relative overflow-hidden rounded-xl border border-burgundy-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                      <div className="absolute inset-0 bg-gradient-to-br from-burgundy-50/40 via-transparent to-cream-50/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="p-5 flex gap-4">
+                        <div className="h-10 w-10 rounded-full bg-ra9ia-50 text-ra9ia-800 flex items-center justify-center ring-1 ring-burgundy-100">
+                          <Megaphone className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-serif text-lg tracking-tight text-ra9ia-900">Marketing Support</h3>
+                          <p className="text-sm text-muted-foreground mt-1">Features in social, email, and homepage partner spotlights to boost visibility.</p>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute -bottom-10 -right-10 h-28 w-28 rounded-full bg-gradient-to-tr from-burgundy-200/20 to-transparent" />
+                    </div>
                   </div>
                 </div>
-                <div className="mt-10 relative h-[300px] overflow-hidden rounded-xl">
+                <div className="mt-10 relative h-[300px] overflow-hidden rounded-xl border border-burgundy-100">
                   <Image
-                    src="/placeholder.svg?height=600&width=800"
+                    src="/images/apply.webp"
                     alt="Partner with Ra9ia Collection"
                     fill
                     className="object-cover"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
                 </div>
               </div>
               <div>
@@ -229,114 +180,131 @@ export default function BecomePartnerPage() {
                       Fill out the form below to apply to become a Ra9ia Collection partner
                     </p>
                   </div>
+                  {/* Progress indicator */}
+                  <div className="flex items-center gap-2">
+                    <div className={`h-1 w-1/2 ${currentStep >= 1 ? 'bg-ra9ia-800' : 'bg-muted'} transition-colors`} />
+                    <div className={`h-1 w-1/2 ${currentStep === 2 ? 'bg-ra9ia-800' : 'bg-muted'} transition-colors`} />
+                  </div>
                   <form className="space-y-6" onSubmit={handleSubmit}>
-                    <div className="grid gap-4">
-                      <div className="grid grid-cols-2 gap-4">
+                    {currentStep === 1 && (
+                      <div className="grid gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="firstName">First name</Label>
+                            <Input 
+                              id="firstName" 
+                              placeholder="Enter your first name" 
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="lastName">Last name</Label>
+                            <Input 
+                              id="lastName" 
+                              placeholder="Enter your last name" 
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              required
+                            />
+                          </div>
+                        </div>
                         <div className="space-y-2">
-                          <Label htmlFor="firstName">First name</Label>
+                          <Label htmlFor="email">Email</Label>
                           <Input 
-                            id="firstName" 
-                            placeholder="Enter your first name" 
-                            value={formData.firstName}
+                            id="email" 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                        <div className="flex justify-end">
+                          <Button type="button" onClick={goNext} className="bg-ra9ia-800 hover:bg-ra9ia-900">Continue</Button>
+                        </div>
+                      </div>
+                    )}
+                    {currentStep === 2 && (
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="company">Company/Brand Name</Label>
+                          <Input 
+                            id="company" 
+                            placeholder="Enter your company or brand name" 
+                            value={formData.company}
                             onChange={handleInputChange}
                             required
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="lastName">Last name</Label>
+                          <Label htmlFor="website">Website/Social Media</Label>
                           <Input 
-                            id="lastName" 
-                            placeholder="Enter your last name" 
-                            value={formData.lastName}
+                            id="website" 
+                            placeholder="Enter your website or social media URL" 
+                            value={formData.website}
                             onChange={handleInputChange}
-                            required
                           />
                         </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="productType">Product Type</Label>
+                          <Select 
+                            value={formData.productType} 
+                            onValueChange={(value) => handleSelectChange("productType", value)}
+                          >
+                            <SelectTrigger id="productType">
+                              <SelectValue placeholder="Select product type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="accessories">Accessories</SelectItem>
+                              <SelectItem value="jewelry">Jewelry</SelectItem>
+                              <SelectItem value="scarves">Scarves & Hijabs</SelectItem>
+                              <SelectItem value="beauty">Beauty & Cosmetics</SelectItem>
+                              <SelectItem value="home">Home Decor</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Partnership Model</Label>
+                          <RadioGroup 
+                            value={formData.partnershipModel} 
+                            onValueChange={handleRadioChange}
+                            className="space-y-3"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="dropship" id="dropship" className="text-ra9ia-600" />
+                              <Label htmlFor="dropship">Dropshipping (you fulfill orders directly)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="consignment" id="consignment" className="text-ra9ia-600" />
+                              <Label htmlFor="consignment">Consignment (we stock and ship your products)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="undecided" id="undecided" className="text-ra9ia-600" />
+                              <Label htmlFor="undecided">Undecided (we can discuss options)</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="description">Tell us about your products</Label>
+                          <Textarea
+                            id="description"
+                            placeholder="Describe your products, price range, and how they complement Ra9ia Collection"
+                            rows={4}
+                            value={formData.description}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <Button type="button" variant="outline" onClick={goBack}>Back</Button>
+                          <Button type="submit" className="bg-ra9ia-800 text-white hover:bg-ra9ia-900">
+                            Submit Application
+                          </Button>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email" 
-                          type="email" 
-                          placeholder="Enter your email" 
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="company">Company/Brand Name</Label>
-                        <Input 
-                          id="company" 
-                          placeholder="Enter your company or brand name" 
-                          value={formData.company}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="website">Website/Social Media</Label>
-                        <Input 
-                          id="website" 
-                          placeholder="Enter your website or social media URL" 
-                          value={formData.website}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="productType">Product Type</Label>
-                        <Select 
-                          value={formData.productType} 
-                          onValueChange={(value) => handleSelectChange("productType", value)}
-                        >
-                          <SelectTrigger id="productType">
-                            <SelectValue placeholder="Select product type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="accessories">Accessories</SelectItem>
-                            <SelectItem value="jewelry">Jewelry</SelectItem>
-                            <SelectItem value="scarves">Scarves & Hijabs</SelectItem>
-                            <SelectItem value="beauty">Beauty & Cosmetics</SelectItem>
-                            <SelectItem value="home">Home Decor</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Partnership Model</Label>
-                        <RadioGroup 
-                          value={formData.partnershipModel} 
-                          onValueChange={handleRadioChange}
-                          className="space-y-3"
-                        >
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="dropship" id="dropship" className="text-ra9ia-600" />
-                            <Label htmlFor="dropship">Dropshipping (you fulfill orders directly)</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="consignment" id="consignment" className="text-ra9ia-600" />
-                            <Label htmlFor="consignment">Consignment (we stock and ship your products)</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="undecided" id="undecided" className="text-ra9ia-600" />
-                            <Label htmlFor="undecided">Undecided (we can discuss options)</Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Tell us about your products</Label>
-                        <Textarea
-                          id="description"
-                          placeholder="Describe your products, price range, and how they complement Ra9ia Collection"
-                          rows={4}
-                          value={formData.description}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                    <Button type="submit" className="w-full bg-ra9ia-800 text-white hover:bg-ra9ia-900">
-                      Submit Application
-                    </Button>
+                    )}
                   </form>
                 </div>
               </div>
@@ -344,174 +312,7 @@ export default function BecomePartnerPage() {
           </div>
         </section>
       </main>
-      <footer className="w-full border-t py-6 md:py-0">
-        <div className="container flex flex-col md:flex-row justify-between gap-4 md:gap-8 md:py-12">
-          <div className="flex flex-col gap-2 md:gap-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="font-serif text-xl font-bold">Ra9ia</span>
-              <span className="font-light">Collection</span>
-            </Link>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Elegance in modesty. Discover our exquisite collection of Abayas and modest fashion pieces.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="space-y-3">
-              <h4 className="font-medium">Shop</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/collections" className="text-muted-foreground hover:text-foreground">
-                    Collections
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/new-arrivals" className="text-muted-foreground hover:text-foreground">
-                    New Arrivals
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/bestsellers" className="text-muted-foreground hover:text-foreground">
-                    Bestsellers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/sale" className="text-muted-foreground hover:text-foreground">
-                    Sale
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <h4 className="font-medium">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/about" className="text-muted-foreground hover:text-foreground">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="text-muted-foreground hover:text-foreground">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/careers" className="text-muted-foreground hover:text-foreground">
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/press" className="text-muted-foreground hover:text-foreground">
-                    Press
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <h4 className="font-medium">Support</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/help" className="text-muted-foreground hover:text-foreground">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/shipping" className="text-muted-foreground hover:text-foreground">
-                    Shipping
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/returns" className="text-muted-foreground hover:text-foreground">
-                    Returns
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/size-guide" className="text-muted-foreground hover:text-foreground">
-                    Size Guide
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-3">
-              <h4 className="font-medium">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/terms" className="text-muted-foreground hover:text-foreground">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cookies" className="text-muted-foreground hover:text-foreground">
-                    Cookie Policy
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 border-t py-6 md:h-16 md:py-0">
-          <p className="text-xs text-muted-foreground">© 2023 Ra9ia Collection. All rights reserved.</p>
-          <div className="flex gap-4">
-            <Link href="#" className="text-muted-foreground hover:text-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-              </svg>
-              <span className="sr-only">Facebook</span>
-            </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
-              </svg>
-              <span className="sr-only">Instagram</span>
-            </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-              </svg>
-              <span className="sr-only">Twitter</span>
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
       
       <PartnerApplicationModal
         isOpen={isModalOpen}

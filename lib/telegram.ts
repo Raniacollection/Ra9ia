@@ -4,6 +4,10 @@
  */
 
 import { formatCurrency } from './utils'
+ 
+// Default username to open chat with when deep-linking to Telegram
+// Prefer environment variable so it can be changed without code edits
+export const DEFAULT_TELEGRAM_USERNAME = (process.env.NEXT_PUBLIC_TELEGRAM_USERNAME || 'onlll4').replace('@', '')
 
 export interface OrderItem {
   product: {

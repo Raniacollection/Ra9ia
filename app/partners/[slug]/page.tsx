@@ -1,7 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
-import { Star } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -75,12 +74,12 @@ export default async function PartnerPage({ params }: PartnerPageProps) {
       <SiteHeader />
       <main className="flex-1">
         {/* Partner Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-cream-50">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  <h1 className="text-3xl font-serif font-semibold tracking-tight sm:text-4xl md:text-5xl text-ra9ia-900">
                     {partner.name}
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
@@ -138,7 +137,7 @@ export default async function PartnerPage({ params }: PartnerPageProps) {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                <h2 className="text-3xl font-serif font-semibold tracking-tight sm:text-4xl md:text-5xl text-ra9ia-900">
                   Products by {partner.name}
                 </h2>
                 <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -181,10 +180,6 @@ export default async function PartnerPage({ params }: PartnerPageProps) {
                         <div>
                           <h3 className="font-medium">{product.name}</h3>
                           <p className="text-sm text-muted-foreground">${product.price}</p>
-                        </div>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 fill-ra9ia-600 text-ra9ia-600" />
-                          <span className="text-sm ml-1">{product.rating || "N/A"}</span>
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground mt-2 line-clamp-2">

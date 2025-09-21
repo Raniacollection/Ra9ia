@@ -2,14 +2,14 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Eye, Heart } from "lucide-react"
+import { Eye } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { QuickViewModal } from "./quick-view-modal"
 import { ProductStockIndicator } from "./product-stock-indicator"
-import { useWishlist } from "../contexts/wishlist-context"
 import { OrderNowModal } from "./order-now-modal"
 
 // Minimal ProductVariantType for the card
@@ -46,6 +46,10 @@ interface ProductCardProps {
   colors?: ProductColor[]; // Keep for QuickViewModal if it hasn't been updated
   sizes?: string[]; // Keep for QuickViewModal
   slug?: string;
+  partnerMessaging?: {
+    telegramUsername?: string
+    whatsappNumber?: string
+  }
 }
 
 export function ProductCard({ 
@@ -59,11 +63,10 @@ export function ProductCard({
   inventoryManagement,
   colors, // Keep for now
   sizes,  // Keep for now
-  slug
+  slug,
+  partnerMessaging
 }: ProductCardProps) {
   const [isOrderModalOpen, setIsOrderModalOpen] = React.useState(false);
-
-  const { addItem: addItemToWishlist, removeItem: removeItemFromWishlist, isInWishlist } = useWishlist()
 
   // Determine display price: use direct price, or first variant's price
   let displayPrice: number | undefined = price;
@@ -81,7 +84,7 @@ export function ProductCard({
   }
 
   const isOutOfStock = inventoryManagement?.trackInventory && (currentTotalStock === 0);
-  const productLink = slug ? `/product/${slug}` : `/product/${id}`; 
+  const productLink = slug ? `/products/${slug}` : `/collections`; 
 
   // Create a temporary inventoryManagement object for child components
   // This is a workaround until child components are updated
@@ -100,12 +103,12 @@ export function ProductCard({
       <CardContent className="p-0">
         <div className="relative">
           <Link href={productLink}>
-            <div className="aspect-[3/4] overflow-hidden">
+            <div className="relative aspect-[3/4] overflow-hidden">
               <Image
                 src={displayImage}
                 alt={name}
-                width={450}
-                height={600}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 className={`object-cover transition-transform group-hover:scale-105 ${isOutOfStock ? 'opacity-70' : ''}`}
               />
               
@@ -118,32 +121,24 @@ export function ProductCard({
                   />
                 </div>
               )}
+
+              {/* Bottom overlay inside image container to avoid any visual gap */}
+              <div className="absolute inset-x-0 bottom-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                <Button 
+                  className="w-full rounded-none h-10 border border-white/50 bg-black/40 text-white hover:bg-black/50"
+                  disabled={isOutOfStock}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsOrderModalOpen(true);
+                  }}
+                >
+                  {isOutOfStock ? "Out of Stock" : "Order Now"}
+                </Button>
+              </div>
             </div>
           </Link>
           <div className="absolute right-2 top-2 flex flex-col gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm text-ra9ia-500 hover:text-ra9ia-700 hover:bg-white"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent link navigation if card is wrapped in Link
-                const wishlistItem = {
-                  id: id, // id is a string
-                  name: name,
-                  price: displayPrice || 0, // Use displayPrice, default to 0 if undefined
-                  image: displayImage, // displayImage has a fallback
-                  color: "", // No specific color selection on card, pass empty string
-                };
-                if (isInWishlist(id)) {
-                  removeItemFromWishlist(id);
-                } else {
-                  addItemToWishlist(wishlistItem);
-                }
-              }}
-            >
-              <Heart className={`h-4 w-4 ${isInWishlist(id) ? "fill-red-500 text-red-500" : ""}`} />
-              <span className="sr-only">{isInWishlist(id) ? "Remove from wishlist" : "Add to wishlist"}</span>
-            </Button>
             {/* QuickViewModal needs update for variants. Passing old props for now. */}
             <QuickViewModal
               productId={id}
@@ -159,7 +154,7 @@ export function ProductCard({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm text-ra9ia-500 hover:text-ra9ia-700 hover:bg-white"
+                  className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-burgundy-100 text-ra9ia-700 hover:text-ra9ia-900 hover:bg-white"
                 >
                   <Eye className="h-4 w-4" />
                   <span className="sr-only">Quick view</span>
@@ -167,22 +162,10 @@ export function ProductCard({
               }
             />
           </div>
-          <div className="absolute inset-x-0 bottom-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-            <Button 
-              className="w-full rounded-none bg-ra9ia-800 text-white hover:bg-ra9ia-900 h-10"
-              disabled={isOutOfStock}
-              onClick={(e) => {
-                e.preventDefault();
-                setIsOrderModalOpen(true);
-              }}
-            >
-              {isOutOfStock ? "Out of Stock" : "Order Now"}
-            </Button>
-          </div>
         </div>
         <div className="p-4">
           <div className="flex justify-between items-start">
-            <Link href={productLink} className="font-medium hover:text-ra9ia-700">
+            <Link href={productLink} className="font-serif text-lg tracking-tight hover:text-ra9ia-900">
               {name}
             </Link>
             
@@ -197,13 +180,11 @@ export function ProductCard({
             )}
           </div>
           <div className="mt-1 flex justify-between items-center">
-            {/* THIS IS THE CRITICAL FIX: Check displayPrice before calling toFixed */}
+            {/* Price in ETB */}
             {displayPrice !== undefined ? (
-              <div className="text-ra9ia-800 font-semibold">
-                ${(displayPrice || 0).toFixed(2)}
-              </div>
+              <div className="text-ra9ia-900 font-medium">{formatCurrency(displayPrice || 0)}</div>
             ) : (
-              <div className="text-ra9ia-800 font-semibold">Price unavailable</div>
+              <div className="text-ra9ia-900 font-medium">Price unavailable</div>
             )}
             
             {/* Color swatches removed, logic was based on old 'colors' prop directly */}
@@ -218,7 +199,10 @@ export function ProductCard({
           id,
           name,
           price: displayPrice,
-          image: displayImage
+          image: displayImage,
+          // Pass slug so we can include a product link in the order message
+          slug: slug,
+          partnerMessaging
           // Pass other necessary product details like variants if your modal handles them
         }}
       />

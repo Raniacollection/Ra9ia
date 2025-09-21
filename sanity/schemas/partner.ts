@@ -79,6 +79,16 @@ export const partner = defineType({
       ],
     }),
     defineField({
+      name: "messaging",
+      title: "Messaging (Overrides)",
+      type: "object",
+      description: "If provided, these will be used for this partner’s products instead of the site defaults.",
+      fields: [
+        { name: "telegramUsername", type: "string", title: "Telegram Username" },
+        { name: "whatsappNumber", type: "string", title: "WhatsApp Number (international format)" },
+      ],
+    }),
+    defineField({
       name: "socialMedia",
       title: "Social Media",
       type: "object",

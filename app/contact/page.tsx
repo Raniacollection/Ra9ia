@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Loader2, Mail, MapPin, Phone } from "lucide-react"
+import { Loader2, Mail, Phone } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { SiteHeader } from "../components/site-header"
 import { SiteFooter } from "../components/site-footer"
+import { useMessagingSettings } from "@/hooks/use-messaging"
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({
@@ -28,6 +29,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState("")
+  const { messaging } = useMessagingSettings()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -65,11 +67,11 @@ export default function ContactPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-cream-50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl text-ra9ia-900">
+                <h1 className="text-3xl font-serif font-semibold tracking-tight sm:text-4xl md:text-5xl text-ra9ia-900">
                   Contact Us
                 </h1>
                 <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -93,19 +95,28 @@ export default function ContactPage() {
                   </p>
 
                   <div className="space-y-6">
+                    {/* Chat with us (replaces Visit Us) */}
                     <div className="flex items-start gap-4">
                       <div className="bg-ra9ia-50 p-3 rounded-full">
-                        <MapPin className="h-5 w-5 text-ra9ia-800" />
+                        <Phone className="h-5 w-5 text-ra9ia-800" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-ra9ia-900">Visit Us</h3>
-                        <address className="text-muted-foreground not-italic">
-                          Ra9ia Collection Boutique
-                          <br />
-                          123 Fashion Avenue
-                          <br />
-                          Dubai, United Arab Emirates
-                        </address>
+                        <h3 className="font-medium text-ra9ia-900">Chat with us</h3>
+                        <div className="text-muted-foreground space-y-1">
+                          {messaging.telegramUsername && (
+                            <p>
+                              Telegram: <a className="text-ra9ia-800 hover:underline" href={`https://t.me/${messaging.telegramUsername.replace('@','')}`} target="_blank" rel="noopener noreferrer">@{messaging.telegramUsername.replace('@','')}</a>
+                            </p>
+                          )}
+                          {messaging.whatsappNumber && (
+                            <p>
+                              WhatsApp: <a className="text-ra9ia-800 hover:underline" href={`https://wa.me/${messaging.whatsappNumber.replace(/[^\d]/g,'')}`} target="_blank" rel="noopener noreferrer">{messaging.whatsappNumber}</a>
+                            </p>
+                          )}
+                          {!messaging.telegramUsername && !messaging.whatsappNumber && (
+                            <p>Reach us directly via the contact form or social channels below.</p>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -136,7 +147,7 @@ export default function ContactPage() {
                         <h3 className="font-medium text-ra9ia-900">Call Us</h3>
                         <p className="text-muted-foreground">
                           <a href="tel:+971123456789" className="hover:text-ra9ia-700">
-                            +971 12 345 6789
+                          +251941267101
                           </a>
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -151,10 +162,10 @@ export default function ContactPage() {
 
                 <div className="relative h-[300px] overflow-hidden rounded-xl">
                   <Image
-                    src="/placeholder.svg?height=600&width=800"
-                    alt="Ra9ia Collection Boutique"
+                    src="/images/contact.webp"
+                    alt="Ra9ia Collection Support"
                     fill
-                    className="object-cover"
+                    className="object-cover object-[center_40%]"
                   />
                 </div>
 

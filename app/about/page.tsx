@@ -64,17 +64,17 @@ export default function AboutPage() {
       <SiteHeader />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-cream-50">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-serif font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-ra9ia-900">
-                    Our Story
+                  <h1 className="text-3xl font-serif font-semibold tracking-tight sm:text-5xl xl:text-6xl/none text-ra9ia-900">
+                    About Ra9ia Collection
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Ra9ia Collection was born from a passion for creating elegant modest fashion that celebrates the
-                    beauty of simplicity and the power of self-expression.
+                    We import curated abayas and modest wear from trusted UAE brands to Ethiopia. Simple selection, clear
+                    pricing, and easy ordering on Telegram.
                   </p>
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export default function AboutPage() {
               </div>
               <div className="relative h-[400px] lg:h-[600px] overflow-hidden rounded-xl">
                 <Image
-                  src="/placeholder.svg?height=1200&width=800"
+                  src="/images/about.webp"
                   alt="Ra9ia Collection Founder"
                   fill
                   className="object-cover"
@@ -105,32 +105,21 @@ export default function AboutPage() {
                   Our Mission
                 </h2>
                 <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  At Ra9ia Collection, we believe that modest fashion is not just about covering the body, but about
-                  expressing one's identity and values through elegant, thoughtful design.
+                  Make elegant modest fashion accessible in Ethiopia—without complexity.
                 </p>
               </div>
               <div className="mx-auto max-w-3xl space-y-4 md:space-y-6 mt-6">
                 <p className="text-muted-foreground">
-                  Founded in 2018 by Fatima Al-Zahra, Ra9ia Collection began as a small passion project and has grown
-                  into a beloved brand serving women across the globe. Our journey started with a simple vision: to
-                  create modest fashion that never compromises on style, quality, or ethical standards.
-                </p>
-                <p className="text-muted-foreground">
-                  Each Ra9ia Collection piece is designed with intention, combining traditional elements with
-                  contemporary aesthetics to create timeless garments that empower women to feel confident and beautiful
-                  while honoring their values.
-                </p>
-                <p className="text-muted-foreground">
-                  We work closely with skilled artisans who share our commitment to quality craftsmanship, ensuring that
-                  every stitch, embroidery, and detail meets our exacting standards. Our production process prioritizes
-                  ethical practices, fair wages, and sustainable methods.
+                  We source in the UAE, you order on Telegram, and we handle import and delivery in Ethiopia. We’ll
+                  finalize address and delivery details directly in chat.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Our Values Section */}
+        {/* Our Values Section (hidden to keep About simple) */}
+        {false && (
         <section className="w-full py-12 md:py-24 lg:py-32 bg-cream-50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
@@ -160,8 +149,10 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+        )}
 
-        {/* Meet the Team Section */}
+        {/* Meet the Team Section (hidden to keep About simple) */}
+        {false && (
         <section className="w-full py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
@@ -188,8 +179,10 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+        )}
 
-        {/* Milestones Section */}
+        {/* Milestones Section (hidden to keep About simple) */}
+        {false && (
         <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
@@ -285,6 +278,7 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* CTA Section */}
         <section className="w-full py-12 md:py-24 lg:py-32">
@@ -315,7 +309,7 @@ export default function AboutPage() {
               </div>
               <div className="relative h-[400px] overflow-hidden rounded-xl">
                 <Image
-                  src="/placeholder.svg?height=800&width=1200"
+                  src="/images/about2.webp"
                   alt="Ra9ia Collection Team"
                   fill
                   className="object-cover"

@@ -34,13 +34,20 @@ export const productQuery = groq`*[_type == "product" && _id == $id][0] {
   reviewCount
 }`
 
-export const productsQuery = groq`*[_type == "product"] {
+export const bestsellersQuery = groq`*[_type == "product" && isBestseller == true] {
   _id,
   name,
   "slug": slug.current,
   "image": images[0].asset->url,
   price,
   description,
+  isPartnerProduct,
+  "partner": partner->{
+    _id,
+    name,
+    "slug": slug.current,
+    messaging
+  },
   colors[] {
     name,
     value,
@@ -56,7 +63,9 @@ export const productsQuery = groq`*[_type == "product"] {
   "category": category->name,
   "collection": collection->name,
   isNewArrival,
-  isBestseller
+  isBestseller,
+  rating,
+  reviewCount
 }`
 
 export const collectionQuery = groq`

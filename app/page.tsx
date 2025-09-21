@@ -1,378 +1,228 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronRight, Heart, Star } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteHeader } from "./components/site-header"
 import { SiteFooter } from "./components/site-footer"
-import { getFeaturedPartnerProducts } from "@/lib/sanity/queries"
-
-// TypeScript interfaces for partner products
-interface Partner {
-  _id: string
-  name: string
-  slug: {
-    current: string
-  }
-}
-
-interface PartnerProduct {
-  _id: string
-  name: string
-  slug: {
-    current: string
-  }
-  price: number
-  description: string
-  imageUrl?: string
-  images: any[]
-  rating?: number
-  reviewCount?: number
-  partner: Partner
-}
+import { EditorialStory } from "./components/editorial-story"
+import { ProductCard } from "./components/product-card"
+import { Truck, RotateCcw, Shield } from "lucide-react"
+import { getFeaturedCollections, getBestsellerProducts, getNewArrivalProducts } from "@/lib/sanity/queries"
+import { SocialFeed } from "@/components/social/social-feed"
 
 export default async function Home() {
-  // Fetch featured partner products from Sanity
-  const featuredPartnerProducts: PartnerProduct[] = await getFeaturedPartnerProducts() || []
+  // Fetch real data with graceful fallbacks to avoid runtime 500s
+  let featuredCollections: any[] = []
+  let spotlightProducts: any[] = []
+  let newArrivalProducts: any[] = []
+
+  try {
+    const [fc, sp, nap] = await Promise.all([
+      getFeaturedCollections().catch(() => []),
+      getBestsellerProducts().catch(() => []),
+      getNewArrivalProducts().catch(() => []),
+    ])
+    featuredCollections = Array.isArray(fc) ? fc : []
+    spotlightProducts = Array.isArray(sp) ? sp : []
+    newArrivalProducts = Array.isArray(nap) ? nap : []
+  } catch {
+    // Network issue (e.g., ENOTFOUND). Keep fallbacks as defined above.
+  }
   return (
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-serif font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Elegance in Modesty
-                  </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Discover our exquisite collection of Abayas and modest fashion pieces designed for the modern Muslim
-                    woman.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/collections">
-                    <Button size="lg" className="bg-ra9ia-800 text-white hover:bg-ra9ia-900">
-                      Shop Collection
-                    </Button>
-                  </Link>
-                  <Link href="/about">
-                    <Button size="lg" variant="outline">
-                      Learn More
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <div className="relative h-[400px] lg:h-[600px] overflow-hidden rounded-xl">
-                <Image
-                  src="/images/hero.png"
-                  alt="Woman in elegant red abaya in desert setting"
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Our Collections
-                </h2>
-                <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Browse our carefully curated collections designed for every occasion
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-              <Link
-                href="/collections/everyday"
-                className="group relative overflow-hidden rounded-lg border border-burgundy-100"
-              >
-                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted">
-                  <Image
-                    src="/placeholder.svg?height=600&width=450"
-                    alt="Everyday Collection"
-                    width={450}
-                    height={600}
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-ra9ia-900/70 to-transparent p-6 text-white">
-                  <div>
-                    <h3 className="text-xl font-medium">Everyday Elegance</h3>
-                    <p className="text-sm text-white/80">Comfortable yet stylish pieces for daily wear</p>
-                  </div>
-                </div>
-              </Link>
-              <Link
-                href="/collections/formal"
-                className="group relative overflow-hidden rounded-lg border border-burgundy-100"
-              >
-                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted">
-                  <Image
-                    src="/placeholder.svg?height=600&width=450"
-                    alt="Formal Collection"
-                    width={450}
-                    height={600}
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-ra9ia-900/70 to-transparent p-6 text-white">
-                  <div>
-                    <h3 className="text-xl font-medium">Formal Occasions</h3>
-                    <p className="text-sm text-white/80">Luxurious abayas for special events</p>
-                  </div>
-                </div>
-              </Link>
-              <Link
-                href="/collections/seasonal"
-                className="group relative overflow-hidden rounded-lg border border-burgundy-100"
-              >
-                <div className="aspect-[3/4] w-full overflow-hidden rounded-lg bg-muted">
-                  <Image
-                    src="/placeholder.svg?height=600&width=450"
-                    alt="Seasonal Collection"
-                    width={450}
-                    height={600}
-                    className="object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-ra9ia-900/70 to-transparent p-6 text-white">
-                  <div>
-                    <h3 className="text-xl font-medium">Seasonal Styles</h3>
-                    <p className="text-sm text-white/80">Weather-appropriate modest fashion</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
-            <div className="flex justify-center mt-10">
-              <Link href="/collections">
-                <Button variant="outline" className="group">
-                  View All Collections
-                  <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">Bestsellers</h2>
-                <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Our most loved pieces chosen by our customers
-                </p>
-              </div>
-            </div>
-            <Tabs defaultValue="all" className="mt-10">
-              <div className="flex justify-center">
-                <TabsList>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="abayas">Abayas</TabsTrigger>
-                  <TabsTrigger value="hijabs">Hijabs</TabsTrigger>
-                  <TabsTrigger value="accessories">Accessories</TabsTrigger>
-                </TabsList>
-              </div>
-              <TabsContent value="all" className="mt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {[1, 2, 3, 4].map((item) => (
-                    <Card key={item} className="overflow-hidden border-0 shadow-sm">
-                      <div className="relative">
-                        <div className="aspect-square overflow-hidden">
-                          <Image
-                            src={`/placeholder.svg?height=400&width=400`}
-                            alt={`Bestseller ${item}`}
-                            width={400}
-                            height={400}
-                            className="object-cover transition-transform hover:scale-105"
-                          />
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="absolute right-2 top-2 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm"
-                        >
-                          <Heart className="h-4 w-4" />
-                          <span className="sr-only">Add to wishlist</span>
-                        </Button>
-                      </div>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium">Classic Black Abaya</h3>
-                            <p className="text-sm text-muted-foreground">$129.99</p>
-                          </div>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 fill-ra9ia-600 text-ra9ia-600" />
-                            <span className="text-sm ml-1">4.9</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="abayas" className="mt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {[1, 2, 3, 4].map((item) => (
-                    <Card key={item} className="overflow-hidden border-0 shadow-sm">
-                      <div className="relative">
-                        <div className="aspect-square overflow-hidden">
-                          <Image
-                            src={`/placeholder.svg?height=400&width=400`}
-                            alt={`Abaya ${item}`}
-                            width={400}
-                            height={400}
-                            className="object-cover transition-transform hover:scale-105"
-                          />
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="absolute right-2 top-2 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm"
-                        >
-                          <Heart className="h-4 w-4" />
-                          <span className="sr-only">Add to wishlist</span>
-                        </Button>
-                      </div>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium">Embroidered Abaya</h3>
-                            <p className="text-sm text-muted-foreground">$149.99</p>
-                          </div>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 fill-ra9ia-600 text-ra9ia-600" />
-                            <span className="text-sm ml-1">4.8</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-              {/* Similar content for other tabs */}
-            </Tabs>
-          </div>
-        </section>
-        <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Partner Products
-                </h2>
-                <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Complementary products from our trusted business partners
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-              {featuredPartnerProducts.length > 0 ? (
-                featuredPartnerProducts.map((product: PartnerProduct) => (
-                  <Card key={product._id} className="overflow-hidden">
-                    <div className="relative aspect-video">
-                      {product.imageUrl ? (
-                        <Image
-                          src={product.imageUrl}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">No image</span>
-                        </div>
-                      )}
-                      <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
-                        {product.partner.name}
+        {/* Hero */}
+        <section className="relative w-full overflow-hidden">
+          <div className="relative h-[68vh] md:h-auto md:aspect-[16/9] bg-cream-50">
+            {/* Use picture for broad compatibility: WebP first, fallback to JPEG */}
+            <picture>
+              <source srcSet="/images/hero.webp" type="image/webp" />
+              {/* Fall back to the existing JPEG until an alt JPG is uploaded */}
+              <img
+                src="/images/hero-desert.jpeg"
+                alt="Ra9ia Editorial — Abayas from UAE, brought to Ethiopia"
+                className="absolute inset-0 h-full w-full object-cover md:object-contain object-[88%_50%] sm:object-[84%_50%] md:object-center"
+                loading="eager"
+              />
+            </picture>
+            {/* Text on wall: left column; right column is a reserved safe zone (no text) */}
+            <div className="absolute inset-0">
+              <div className="container h-full px-4 md:px-6">
+                <div className="grid h-full grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(280px,38vw)]">
+                  <div className="flex items-center py-10 md:py-0">
+                    <div className="wall-placard max-w-[52ch] pr-[28vw] sm:pr-[24vw] md:pr-0">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-ra9ia-900/70">Ra9ia Collection</p>
+                      <h1 className="mt-2 text-4xl md:text-6xl font-serif tracking-tight text-ra9ia-900 leading-[1.05]">
+                        Abayas from UAE, brought to Ethiopia
+                      </h1>
+                      <p className="mt-3 text-base md:text-lg text-ra9ia-900/85 max-w-[45ch]">
+                        Simple, elegant abayas and modest wear handpicked from UAE brands. Order easily on Telegram.
+                      </p>
+                      <div className="mt-5 flex gap-2">
+                        <Link href="/collections" prefetch>
+                          <Button className="bg-ra9ia-900 text-white hover:bg-ra9ia-900/90">Shop Collections</Button>
+                        </Link>
+                        <Link href="/bestsellers" prefetch>
+                          <Button variant="outline" className="border-ra9ia-900/30 text-ra9ia-900 hover:bg-black/5">
+                            Bestsellers
+                          </Button>
+                        </Link>
                       </div>
                     </div>
-                    <CardContent className="p-6">
-                      <h3 className="text-lg font-medium mb-2">{product.name}</h3>
-                      <p className="text-muted-foreground mb-4 line-clamp-2">
-                        {product.description}
-                      </p>
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="font-medium">${product.price}</div>
-                        <div className="flex items-center">
-                          {Array(5).fill(0).map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-4 w-4 ${i < Math.round(product.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <Link href={`/partners/${product.partner.slug.current}/products/${product.slug.current}`}>
-                        <Button variant="outline" className="w-full">
-                          View Product
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-3 text-center py-8">
-                  <p className="text-muted-foreground">No featured partner products available</p>
+                  </div>
+                  <div className="hidden md:block" aria-hidden="true" />
                 </div>
-              )}
-            </div>
-            <div className="mt-12 text-center">
-              <h3 className="text-xl font-medium mb-4">Are you a business owner?</h3>
-              <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-                Partner with Ra9ia Collection to showcase your complementary products to our customers.
-              </p>
-              <Link href="/become-partner">
-                <Button>Become a Partner</Button>
-              </Link>
+              </div>
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-cream-50">
+
+        {/* USP Strip */}
+        <section className="w-full py-6 bg-white border-y border-burgundy-100">
           <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                    Subscribe to Our Newsletter
-                  </h2>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Stay updated with our latest collections, exclusive offers, and modest fashion tips.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  />
-                  <Button className="bg-ra9ia-800 text-white hover:bg-ra9ia-900">Subscribe</Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  By subscribing, you agree to our Terms of Service and Privacy Policy.
-                </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
+              <div className="flex items-center gap-3 justify-center sm:justify-start">
+                <Truck className="h-5 w-5 text-ra9ia-900/70" />
+                <span className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80">Fast delivery</span>
               </div>
-              <div className="relative h-[400px] overflow-hidden rounded-xl">
-                <Image
-                  src="/placeholder.svg?height=800&width=600"
-                  alt="Newsletter subscription"
-                  fill
-                  className="object-cover"
-                />
+              <div className="flex items-center gap-3 justify-center sm:justify-start">
+                <RotateCcw className="h-5 w-5 text-ra9ia-900/70" />
+                <span className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80">Easy returns</span>
+              </div>
+              <div className="flex items-center gap-3 justify-center sm:justify-start">
+                <Shield className="h-5 w-5 text-ra9ia-900/70" />
+                <span className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80">Secure checkout</span>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Lookbook (Creative large-format horizontal cards) */}
+        {newArrivalProducts && newArrivalProducts.length > 0 && (
+          <section className="w-full py-12 md:py-16">
+            <div className="container px-4 md:px-6">
+              <p className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/70">Lookbook</p>
+              <h2 className="mt-2 text-3xl md:text-4xl font-serif tracking-tight text-ra9ia-900">AW25 Scenes</h2>
+              <div className="mt-6 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex gap-4 md:gap-6 snap-x snap-mandatory">
+                  {newArrivalProducts.slice(0, 6).map((p: any, idx: number) => (
+                    <Link
+                      key={p._id}
+                      href={p.slug?.current ? `/products/${p.slug.current}` : "/bestsellers"}
+                      className="snap-start relative group shrink-0 w-[85%] sm:w-[70%] md:w-[55%] aspect-[3/4] overflow-hidden rounded-none md:rounded border border-burgundy-100"
+                    >
+                      <Image
+                        src={p.imageUrl || "/placeholder.svg"}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 768px) 85vw, (max-width: 1024px) 70vw, 55vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/15 to-transparent" />
+                      <div className="absolute left-4 bottom-4 right-4 text-white">
+                        <div className="text-[10px] uppercase tracking-[0.2em] text-white/80">Look {String(idx + 1).padStart(2, "0")}</div>
+                        <div className="font-serif text-2xl md:text-3xl tracking-tight line-clamp-1">{p.name}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* The Capsule (Creative Mosaic) */}
+        {featuredCollections && featuredCollections.length > 0 && (
+          <section className="w-full py-12 md:py-16 bg-cream-50">
+            <div className="container px-4 md:px-6">
+              <p className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/70">The Capsule</p>
+              <h2 className="mt-2 text-3xl md:text-4xl font-serif tracking-tight text-ra9ia-900">Editor’s Curations</h2>
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 auto-rows-[180px] md:auto-rows-[220px] gap-3 md:gap-4">
+                {/* Feature tile */}
+                {featuredCollections[0] && (
+                  <Link
+                    href={`/collections/${featuredCollections[0].slug.current}`}
+                    className="relative col-span-2 md:col-span-3 row-span-2 overflow-hidden rounded-none md:rounded border border-burgundy-100 group"
+                  >
+                    <Image src={featuredCollections[0].imageUrl || "/placeholder.svg"} alt={featuredCollections[0].name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent" />
+                    <div className="absolute left-4 bottom-4 text-white">
+                      <div className="text-[11px] uppercase tracking-[0.2em] text-white/80">Collection</div>
+                      <div className="font-serif text-2xl md:text-3xl tracking-tight">{featuredCollections[0].name}</div>
+                    </div>
+                  </Link>
+                )}
+                {/* Secondary tiles */}
+                {featuredCollections.slice(1, 3).map((c) => (
+                  <Link
+                    key={c._id}
+                    href={`/collections/${c.slug.current}`}
+                    className="relative col-span-1 md:col-span-1 lg:col-span-1 row-span-1 overflow-hidden rounded-none md:rounded border border-burgundy-100 group"
+                  >
+                    <Image src={c.imageUrl || "/placeholder.svg"} alt={c.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
+                    <div className="absolute left-3 bottom-3">
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-white/80">Collection</div>
+                      <div className="font-serif text-lg tracking-tight text-white">{c.name}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-6 flex justify-center">
+                <Link href="/collections">
+                  <Button variant="outline" className="rounded-none md:rounded border-burgundy-200">View all Collections</Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Spotlight (Real products, minimal horizontal scroll) */}
+        {spotlightProducts && spotlightProducts.length > 0 && (
+          <section className="w-full py-12 md:py-16">
+            <div className="container px-4 md:px-6">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/70">Spotlight</p>
+                  <h2 className="mt-2 text-3xl md:text-4xl font-serif tracking-tight text-ra9ia-900">Editor’s Select</h2>
+                </div>
+                <Link href="/bestsellers" className="hidden sm:inline-flex">
+                  <Button variant="outline" className="rounded-none md:rounded border-burgundy-200">View all</Button>
+                </Link>
+              </div>
+              <div className="mt-6 relative">
+                <div className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex gap-4 md:gap-6 snap-x snap-mandatory">
+                    {spotlightProducts.map((p) => (
+                      <div key={p._id} className="snap-start shrink-0 w-[72%] sm:w-[46%] md:w-[32%] lg:w-[24%]">
+                        <ProductCard
+                          id={p._id}
+                          name={p.name}
+                          price={p.price}
+                          image={p.imageUrl || "/placeholder.svg"}
+                          slug={p.slug?.current}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="sm:hidden mt-4">
+                <Link href="/bestsellers">
+                  <Button variant="outline" className="w-full border-burgundy-200">View all</Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+
+        {/* Editorial Story */}
+        <EditorialStory />
+
+        {/* Social Feed (optional; shows when Instagram env vars are configured) */}
+        <SocialFeed />
       </main>
       <SiteFooter />
     </div>

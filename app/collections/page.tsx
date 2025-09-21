@@ -29,11 +29,11 @@ export default async function CollectionsPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-burgundy-50">
+        <section className="w-full py-14 md:py-20 bg-cream-50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-serif font-bold tracking-tighter sm:text-4xl md:text-5xl text-ra9ia-900">
+                <h1 className="text-3xl font-serif font-semibold tracking-tight sm:text-4xl md:text-5xl text-ra9ia-900">
                   Our Collections
                 </h1>
                 <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -61,7 +61,7 @@ export default async function CollectionsPage() {
                     </SheetHeader>
                     <div className="grid gap-4 py-4">
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-ra9ia-900">Categories</h3>
+                        <h3 className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80">Categories</h3>
                         <div className="grid grid-cols-1 gap-2">
                           <Button variant="outline" size="sm" className="justify-start bg-ra9ia-50 border-ra9ia-200">
                             Abayas
@@ -79,7 +79,7 @@ export default async function CollectionsPage() {
                       </div>
                       <Separator className="bg-burgundy-100" />
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-ra9ia-900">Colors</h3>
+                        <h3 className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80">Colors</h3>
                         <div className="grid grid-cols-2 gap-2">
                           <Button variant="outline" size="sm" className="justify-start">
                             Black
@@ -97,7 +97,7 @@ export default async function CollectionsPage() {
                       </div>
                       <Separator className="bg-burgundy-100" />
                       <div className="space-y-2">
-                        <h3 className="text-sm font-medium text-ra9ia-900">Price Range</h3>
+                        <h3 className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80">Price Range</h3>
                         <div className="grid grid-cols-1 gap-2">
                           <Button variant="outline" size="sm" className="justify-start">
                             Under $50
@@ -148,7 +148,7 @@ export default async function CollectionsPage() {
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <div className="flex items-center border rounded-md border-burgundy-100">
+                <div className="flex items-center border rounded-none md:rounded border-burgundy-100">
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-ra9ia-700">
                     <Grid3X3 className="h-4 w-4" />
                     <span className="sr-only">Grid view</span>
@@ -160,14 +160,16 @@ export default async function CollectionsPage() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {products.map((product) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {products.map((product: any) => (
                 <ProductCard
                   key={product._id}
                   id={product._id}
                   name={product.name}
                   price={product.price}
                   image={product.image || '/placeholder.svg?height=600&width=450'}
+                  slug={product.slug}
+                  partnerMessaging={product.partner?.messaging}
                   description={product.description}
                   colors={product.colors}
                   sizes={product.sizes}

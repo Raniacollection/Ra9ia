@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight, Heart, Minus, Plus, Star, X } from "lucide-react"
+import { ChevronRight, Minus, Plus, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -14,8 +14,8 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { ProductCard } from "./product-card"
 import { ProductStockIndicator } from "./product-stock-indicator"
 import { RestockNotification } from "./restock-notification"
-import { useWishlist } from "../contexts/wishlist-context"
 import { OrderNowModal } from "./order-now-modal"
+import { formatCurrency } from "@/lib/utils"
 
 interface ProductDetailsProps {
   product: any // We'll improve this type later
@@ -28,8 +28,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [isImageOpen, setIsImageOpen] = useState(false)
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false)
-
-  const { addItem: addItemToWishlist, removeItem: removeItemFromWishlist, isInWishlist } = useWishlist()
 
   const handleIncrement = () => {
     setQuantity((prev) => Math.min(prev + 1, 10))
@@ -56,7 +54,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <div className="space-y-4">
         <Dialog open={isImageOpen} onOpenChange={setIsImageOpen}>
           <DialogTrigger asChild>
-            <div className="aspect-square relative overflow-hidden rounded-lg border border-burgundy-100 cursor-pointer">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg border border-burgundy-100 cursor-pointer">
               <Image
                 src={product.images[selectedImage] || "/placeholder.svg"}
                 alt={product.name}
@@ -111,20 +109,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <div className="space-y-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-serif font-bold tracking-tight text-ra9ia-900">{product.name}</h1>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-5 w-5 ${i < (product.rating || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {product.reviewCount || 0} {product.reviewCount === 1 ? "review" : "reviews"}
-            </span>
-          </div>
-          <div className="text-2xl font-semibold text-ra9ia-800">${product.price.toFixed(2)}</div>
+          <div className="text-2xl font-semibold text-ra9ia-800">{formatCurrency(product.price)}</div>
           
           {/* Stock Information */}
           {product.inventoryManagement?.trackInventory && (
@@ -303,27 +288,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             }}
           >
             {product.inventoryManagement?.totalStock === 0 ? "Out of Stock" : "Order Now"}
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-burgundy-200 hover:bg-burgundy-50"
-            onClick={() => {
-              const wishlistItem = {
-                id: product._id,
-                name: product.name,
-                price: product.price,
-                image: product.images?.[0] || "/placeholder.svg",
-                color: selectedColor,
-              };
-              if (isInWishlist(product._id)) {
-                removeItemFromWishlist(product._id);
-              } else {
-                addItemToWishlist(wishlistItem);
-              }
-            }}
-          >
-            <Heart className={`mr-2 h-4 w-4 ${isInWishlist(product._id) ? "fill-red-500 text-red-500" : ""}`} />
-            {isInWishlist(product._id) ? "Remove from Wishlist" : "Add to Wishlist"}
           </Button>
         </div>
 

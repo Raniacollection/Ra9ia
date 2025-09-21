@@ -3,6 +3,10 @@
 ## Current Project Overview
 Ra9ia Collection is an e-commerce platform built with Next.js, Sanity CMS, and various modern web technologies. The project aims to provide a seamless shopping experience for users while maintaining a robust backend infrastructure.
 
+## Luxury Redesign Documentation
+For the approved luxury, editorial redesign plan and phased roadmap, see:
+- docs/luxury-redesign.md
+
 ## Tech Stack
 - **Frontend**: Next.js 15.2.4, React 19
 - **Backend**: Next.js API Routes, Sanity CMS

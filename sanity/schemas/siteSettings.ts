@@ -50,6 +50,15 @@ export const siteSettings = defineType({
       ],
     }),
     defineField({
+      name: "messaging",
+      title: "Messaging",
+      type: "object",
+      fields: [
+        { name: "telegramUsername", type: "string", title: "Telegram Username" },
+        { name: "whatsappNumber", type: "string", title: "WhatsApp Number (international format)" },
+      ],
+    }),
+    defineField({
       name: "contactInfo",
       title: "Contact Information",
       type: "object",

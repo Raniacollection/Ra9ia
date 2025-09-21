@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ProductStockIndicator } from "./product-stock-indicator"
+import { formatCurrency } from "@/lib/utils"
 
 interface ProductColor {
   name: string
@@ -113,7 +114,7 @@ export function QuickViewModal({
       <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden">
         <div className="grid md:grid-cols-2 gap-0">
           <div className="flex flex-col space-y-2 p-2">
-            <div className="relative aspect-square overflow-hidden rounded-md">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-md">
               <Image 
                 src={allImages[selectedImage]} 
                 alt={productName} 
@@ -128,7 +129,7 @@ export function QuickViewModal({
                 {allImages.map((img, idx) => (
                   <div 
                     key={idx} 
-                    className={`aspect-square relative overflow-hidden rounded-md border cursor-pointer transition-all ${
+                    className={`relative aspect-[3/4] overflow-hidden rounded-md border cursor-pointer transition-all ${
                       selectedImage === idx 
                         ? "border-ra9ia-500 ring-1 ring-ra9ia-200" 
                         : "border-burgundy-100 hover:border-burgundy-300"
@@ -146,7 +147,7 @@ export function QuickViewModal({
             <DialogHeader>
               <DialogTitle className="text-xl font-serif text-ra9ia-900">{productName}</DialogTitle>
               <DialogDescription>
-                <span className="text-lg font-medium text-ra9ia-800">${productPrice.toFixed(2)}</span>
+                <span className="text-lg font-medium text-ra9ia-800">{formatCurrency(productPrice)}</span>
               </DialogDescription>
             </DialogHeader>
 

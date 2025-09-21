@@ -1,9 +1,10 @@
+"use client"
+
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { 
   Sheet, 
   SheetContent, 
@@ -12,12 +13,10 @@ import {
   SheetHeader, 
   SheetTitle 
 } from "@/components/ui/sheet"
-import { 
-  generateOrderId, 
-  redirectToTelegramWithOrder,
-  type TelegramOrderData
-} from "@/lib/telegram"
+import { DEFAULT_TELEGRAM_USERNAME, generateTelegramChatLink } from "@/lib/telegram"
 import { formatCurrency } from "@/lib/utils"
+import { useMessagingSettings } from "@/hooks/use-messaging"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export interface CartItem {
   _id: string
@@ -27,6 +26,11 @@ export interface CartItem {
   color?: string
   size?: string
   image?: string
+  slug?: string
+  partnerMessaging?: {
+    telegramUsername?: string
+    whatsappNumber?: string
+  }
 }
 
 interface CartTelegramCheckoutProps {
@@ -42,22 +46,16 @@ export function CartTelegramCheckout({
   cartItems,
   telegramUsername
 }: CartTelegramCheckoutProps) {
-  const router = useRouter()
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     email: "",
     phone: "",
     telegramUsername: "",
   })
-  const [shippingAddress, setShippingAddress] = useState({
-    street: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "",
-  })
-  const [shippingNotes, setShippingNotes] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { messaging } = useMessagingSettings()
+  const [contactMethod, setContactMethod] = useState<'telegram' | 'whatsapp'>('telegram')
+  const [contactHandle, setContactHandle] = useState('')
 
   // Calculate total amount
   const totalAmount = cartItems.reduce(
@@ -66,22 +64,14 @@ export function CartTelegramCheckout({
   )
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target
-    
-    if (name.includes("address.")) {
-      const addressField = name.split(".")[1]
-      setShippingAddress({
-        ...shippingAddress,
-        [addressField]: value
-      })
-    } else {
-      setCustomerInfo({
-        ...customerInfo,
-        [name]: value
-      })
-    }
+
+    setCustomerInfo({
+      ...customerInfo,
+      [name]: value
+    })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,27 +79,65 @@ export function CartTelegramCheckout({
     setIsSubmitting(true)
 
     try {
-      // Prepare order data
-      const orderData: TelegramOrderData = {
-        orderId: generateOrderId(),
-        customerInfo,
-        orderItems: cartItems.map(item => ({
-          product: {
-            _id: item._id,
-            name: item.name,
-            price: item.price
-          },
-          quantity: item.quantity,
-          color: item.color,
-          size: item.size
-        })),
-        totalAmount,
-        shippingAddress,
-        shippingNotes
+      // Build concise message
+      const lines: string[] = []
+      const SITE_ORIGIN = 'https://runniacollection.net'
+      lines.push("Cart order request:\n")
+      cartItems.forEach((item, idx) => {
+        const parts = [
+          `${idx + 1}. ${item.name}`,
+          item.color ? `Color: ${item.color}` : undefined,
+          item.size ? `Size: ${item.size}` : undefined,
+          `Qty: ${item.quantity}`,
+          `Subtotal: ${formatCurrency(item.price * item.quantity)}`
+        ].filter(Boolean)
+        lines.push(parts.join(" | "))
+        if (item.slug) {
+          lines.push(`Link: ${SITE_ORIGIN}/products/${item.slug}`)
+        }
+      })
+      lines.push("\nTotal: " + formatCurrency(totalAmount))
+      if (customerInfo.name || customerInfo.email || customerInfo.phone) {
+        lines.push("\nCustomer:")
+        if (customerInfo.name) lines.push(`Name: ${customerInfo.name}`)
+        if (customerInfo.email) lines.push(`Email: ${customerInfo.email}`)
+        if (customerInfo.phone) lines.push(`Phone: ${customerInfo.phone}`)
+      }
+      if (contactHandle) lines.push(`\nCustomer handle: ${contactHandle}`)
+      lines.push("\nWe’ll finalize address and delivery details in chat.")
+
+      const message = lines.join("\n")
+
+      // Determine effective messaging: if all items with partnerMessaging share same handles, use those; else site defaults
+      const partnerHandles = cartItems
+        .map(i => i.partnerMessaging)
+        .filter(Boolean) as { telegramUsername?: string; whatsappNumber?: string }[]
+
+      const validPartner = partnerHandles.filter(m => (m.telegramUsername && m.telegramUsername.trim()) || (m.whatsappNumber && m.whatsappNumber.trim()))
+      let effectiveTelegram = messaging.telegramUsername || null
+      let effectiveWhatsApp = messaging.whatsappNumber || null
+      if (validPartner.length > 0) {
+        const first = validPartner[0]
+        const allSame = validPartner.every(m => (m.telegramUsername || '') === (first.telegramUsername || '') && (m.whatsappNumber || '') === (first.whatsappNumber || ''))
+        if (allSame) {
+          effectiveTelegram = first.telegramUsername || effectiveTelegram
+          effectiveWhatsApp = first.whatsappNumber || effectiveWhatsApp
+        }
       }
 
-      // Redirect to Telegram with order information
-      redirectToTelegramWithOrder(telegramUsername, orderData)
+      if (contactMethod === 'telegram') {
+        const username = (effectiveTelegram || DEFAULT_TELEGRAM_USERNAME).replace('@','')
+        const url = generateTelegramChatLink(username, message)
+        if (url) window.open(url, '_blank')
+      } else {
+        const numberRaw = (effectiveWhatsApp || '').replace(/[^\d]/g, '')
+        if (!numberRaw) {
+          alert('WhatsApp number is not configured yet. Please set it in Site Settings.')
+        } else {
+          const url = `https://wa.me/${numberRaw}?text=${encodeURIComponent(message)}`
+          window.open(url, '_blank')
+        }
+      }
       
       // Close the checkout sheet
       onClose()
@@ -131,13 +159,13 @@ export function CartTelegramCheckout({
         <SheetHeader>
           <SheetTitle id="checkout-title">Complete Your Order</SheetTitle>
           <SheetDescription>
-            Fill in your details to complete your order via Telegram
+            We’ll finalize address and delivery details directly in chat.
           </SheetDescription>
         </SheetHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Your Information</h3>
+            <h3 className="text-sm font-medium">Optional Contact</h3>
             
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name</Label>
@@ -146,30 +174,27 @@ export function CartTelegramCheckout({
                 name="name"
                 value={customerInfo.name}
                 onChange={handleInputChange}
-                required
               />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email (optional)</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
                 value={customerInfo.email}
                 onChange={handleInputChange}
-                required
               />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">Phone Number (optional)</Label>
               <Input
                 id="phone"
                 name="phone"
                 value={customerInfo.phone}
                 onChange={handleInputChange}
-                required
               />
             </div>
             
@@ -185,96 +210,53 @@ export function CartTelegramCheckout({
                 placeholder="@username"
               />
             </div>
-          </div>
-          
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium">Shipping Address</h3>
-            
             <div className="grid gap-2">
-              <Label htmlFor="address.street">Street Address</Label>
+              <Label>Contact Via</Label>
+              <Select value={contactMethod} onValueChange={(v: 'telegram' | 'whatsapp') => setContactMethod(v)}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Select messaging app" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="telegram">Telegram</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="contactHandle">{contactMethod === 'telegram' ? 'Your Telegram username' : 'Your WhatsApp number'}</Label>
               <Input
-                id="address.street"
-                name="address.street"
-                value={shippingAddress.street}
-                onChange={handleInputChange}
-                required
+                id="contactHandle"
+                value={contactHandle}
+                onChange={(e) => setContactHandle(e.target.value)}
+                placeholder={contactMethod === 'telegram' ? '@username' : '+251...'}
               />
             </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div className="grid gap-2">
-                <Label htmlFor="address.city">City</Label>
-                <Input
-                  id="address.city"
-                  name="address.city"
-                  value={shippingAddress.city}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="address.state">State/Province</Label>
-                <Input
-                  id="address.state"
-                  name="address.state"
-                  value={shippingAddress.state}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div className="grid gap-2">
-                <Label htmlFor="address.postalCode">Postal Code</Label>
-                <Input
-                  id="address.postalCode"
-                  name="address.postalCode"
-                  value={shippingAddress.postalCode}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="address.country">Country</Label>
-                <Input
-                  id="address.country"
-                  name="address.country"
-                  value={shippingAddress.country}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="shippingNotes">
-              Additional Notes (optional)
-            </Label>
-            <Textarea
-              id="shippingNotes"
-              value={shippingNotes}
-              onChange={(e) => setShippingNotes(e.target.value)}
-              placeholder="Any special instructions for your order"
-              className="min-h-[80px]"
-            />
           </div>
           
           <div className="space-y-2">
             <h3 className="text-sm font-medium">Order Summary</h3>
             <div className="border rounded-md p-4 space-y-3">
               {cartItems.map((item) => (
-                <div key={`${item._id}-${item.color}-${item.size}`} className="flex justify-between text-sm">
-                  <div>
-                    <span className="font-medium">{item.name}</span>
-                    {item.color && <span className="text-muted-foreground"> - {item.color}</span>}
-                    {item.size && <span className="text-muted-foreground"> - {item.size}</span>}
-                    <span className="text-muted-foreground"> × {item.quantity}</span>
+                <div key={`${item._id}-${item.color}-${item.size}`} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {item.image ? (
+                      <div className="h-12 w-12 relative rounded-md overflow-hidden flex-shrink-0">
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      </div>
+                    ) : (
+                      <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{item.name}</div>
+                      <div className="text-muted-foreground">
+                        {item.color && <span>Color: {item.color}</span>}
+                        {item.color && item.size && <span> | </span>}
+                        {item.size && <span>Size: {item.size}</span>}
+                        <span className="ml-1">× {item.quantity}</span>
+                      </div>
+                    </div>
                   </div>
-                  <span>{formatCurrency(item.price * item.quantity)}</span>
+                  <span className="ml-3 flex-shrink-0">{formatCurrency(item.price * item.quantity)}</span>
                 </div>
               ))}
               
@@ -291,7 +273,7 @@ export function CartTelegramCheckout({
               className="w-full"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Processing..." : "Complete Order via Telegram"}
+              {isSubmitting ? "Processing..." : `Continue on ${contactMethod === 'telegram' ? 'Telegram' : 'WhatsApp'}`}
             </Button>
           </SheetFooter>
         </form>

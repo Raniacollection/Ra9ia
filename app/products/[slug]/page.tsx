@@ -4,9 +4,8 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { createClient } from "@sanity/client"
-import imageUrlBuilder from "@sanity/image-url"
-import { Star, ChevronRight, Heart, Share2, ShoppingBag } from "lucide-react"
+import { client, urlFor } from "@/sanity/lib/client"
+import { ChevronRight, Share2, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -15,19 +14,7 @@ import { SiteFooter } from "@/app/components/site-footer"
 import { useCart } from "@/hooks/use-cart"
 import { formatCurrency } from "@/lib/utils"
 import { CartTelegramCheckout } from "@/components/cart/cart-telegram-checkout"
-import { useWishlist } from "@/app/contexts/wishlist-context"
-
-// Initialize Sanity client
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "",
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
-  useCdn: true,
-  apiVersion: "2023-05-03",
-})
-
-// Initialize image URL builder
-const builder = imageUrlBuilder(client)
-const urlFor = (source: any) => builder.image(source)
+ 
 
 interface ProductColor {
   name: string
@@ -76,6 +63,10 @@ interface Product {
     slug: {
       current: string
     }
+    messaging?: {
+      telegramUsername?: string | null
+      whatsappNumber?: string | null
+    }
   }
   inventoryManagement: {
     trackInventory: boolean
@@ -88,7 +79,6 @@ interface Product {
 export default function ProductPage() {
   const params = useParams()
   const { addItem } = useCart()
-  const { addItem: addItemToWishlist, removeItem: removeItemFromWishlist, isInWishlist } = useWishlist()
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -121,7 +111,7 @@ export default function ProductPage() {
             isNewArrival,
             isBestseller,
             isPartnerProduct,
-            "partner": partner->{name, slug},
+            "partner": partner->{name, slug, messaging},
             inventoryManagement
           }`,
           { slug: params.slug }
@@ -158,14 +148,20 @@ export default function ProductPage() {
     const colorName = product.colors?.find(c => c.value === selectedColor)?.name || ""
 
     addItem({
-      id: product._id, 
+      _id: product._id,
       name: product.name,
       price: product.price,
+      quantity: quantity,
       color: colorName,
-      size: selectedSize || "", 
-      image: (product.images && product.images.length > 0 
-        ? urlFor(product.images[0]).width(100).height(100).url() 
-        : "/placeholder.svg")
+      size: selectedSize || "",
+      image: (product.images && product.images.length > 0
+        ? urlFor(product.images[0]).width(100).height(100).url()
+        : "/placeholder.svg"),
+      slug: product.slug?.current,
+      partnerMessaging: product.isPartnerProduct && product.partner?.messaging ? {
+        telegramUsername: product.partner.messaging.telegramUsername || undefined,
+        whatsappNumber: product.partner.messaging.whatsappNumber || undefined,
+      } : undefined
     })
 
     // Show added to cart confirmation
@@ -175,23 +171,7 @@ export default function ProductPage() {
     }, 2000)
   }
 
-  const handleAddToWishlist = () => {
-    if (!product) return;
-
-    const wishlistItem = {
-      id: product._id,
-      name: product.name,
-      price: product.price,
-      image: product.images?.[activeImageIndex] ? urlFor(product.images[activeImageIndex]).width(100).height(100).url() : (product.images?.[0] ? urlFor(product.images[0]).width(100).height(100).url() : "/placeholder.svg"),
-      color: product.colors?.find(c => c.value === selectedColor)?.name || "",
-    };
-
-    if (isInWishlist(product._id)) {
-      removeItemFromWishlist(product._id);
-    } else {
-      addItemToWishlist(wishlistItem);
-    }
-  };
+  
 
   const handleBuyNow = () => {
     handleAddToCart()
@@ -255,14 +235,14 @@ export default function ProductPage() {
         </div>
 
         {/* Product Details */}
-        <div className="container px-4 py-6">
+        <div className="container px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Product Images */}
             <div className="space-y-4">
-              <div className="relative aspect-square overflow-hidden rounded-lg border">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-none md:rounded-xl border border-burgundy-100">
                 {product.images && product.images.length > 0 ? (
                   <Image
-                    src={urlFor(product.images[activeImageIndex]).width(800).height(800).url()}
+                    src={urlFor(product.images[activeImageIndex]).width(800).height(1067).url()}
                     alt={product.name}
                     fill
                     className="object-cover"
@@ -289,7 +269,7 @@ export default function ProductPage() {
                   {product.images.map((image, index) => (
                     <button
                       key={image._key}
-                      className={`relative aspect-square rounded-md overflow-hidden border ${
+                      className={`relative aspect-square rounded-none md:rounded overflow-hidden border border-burgundy-100 ${
                         index === activeImageIndex ? "ring-2 ring-ra9ia-800" : ""
                       }`}
                       onClick={() => setActiveImageIndex(index)}
@@ -312,31 +292,15 @@ export default function ProductPage() {
                 {product.isPartnerProduct && product.partner && (
                   <Link 
                     href={`/partners/${product.partner.slug.current}`}
-                    className="text-sm text-muted-foreground hover:text-foreground"
+                    className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/70 hover:text-ra9ia-900"
                   >
                     By {product.partner.name}
                   </Link>
                 )}
                 
-                <h1 className="text-3xl font-serif font-bold mt-1">{product.name}</h1>
+                <h1 className="text-3xl md:text-4xl font-serif font-semibold tracking-tight mt-1">{product.name}</h1>
                 
                 <div className="flex items-center mt-2 space-x-4">
-                  <div className="flex items-center">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.floor(product.rating)
-                            ? "text-amber-500 fill-amber-500"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-muted-foreground">
-                      ({product.reviewCount} reviews)
-                    </span>
-                  </div>
-                  
                   {product.inventoryManagement?.trackInventory && (
                     <div className="text-sm">
                       {product.inventoryManagement.totalStock <= 0 ? (
@@ -355,7 +319,7 @@ export default function ProductPage() {
                 </div>
                 
                 <div className="mt-4">
-                  <span className="text-2xl font-bold">{formatCurrency(product.price)}</span>
+                  <span className="text-2xl font-semibold text-ra9ia-900">{formatCurrency(product.price)}</span>
                 </div>
               </div>
               
@@ -363,7 +327,7 @@ export default function ProductPage() {
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium mb-3">Color</h3>
+                    <h3 className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80 mb-3">Color</h3>
                     <div className="flex flex-wrap gap-2">
                       {product.colors.map((color) => (
                         <button
@@ -388,15 +352,15 @@ export default function ProductPage() {
                 {/* Size Selection */}
                 {product.sizes && product.sizes.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium mb-3">Size</h3>
+                    <h3 className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80 mb-3">Size</h3>
                     <div className="flex flex-wrap gap-2">
                       {product.sizes.map((size) => (
                         <button
                           key={size}
-                          className={`px-4 py-2 border rounded-md ${
+                          className={`px-4 py-2 border rounded-none md:rounded ${
                             selectedSize === size
                               ? "bg-ra9ia-800 text-white border-ra9ia-800"
-                              : "bg-background border-input"
+                              : "bg-white border-burgundy-100"
                           }`}
                           onClick={() => setSelectedSize(size)}
                         >
@@ -409,8 +373,8 @@ export default function ProductPage() {
                 
                 {/* Quantity Selection */}
                 <div>
-                  <h3 className="text-sm font-medium mb-3">Quantity</h3>
-                  <div className="flex items-center w-32 border rounded-md">
+                  <h3 className="text-xs uppercase tracking-[0.15em] text-ra9ia-900/80 mb-3">Quantity</h3>
+                  <div className="flex items-center w-32 border rounded-none md:rounded border-burgundy-100">
                     <button
                       className="w-10 h-10 flex items-center justify-center text-lg border-r"
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -442,7 +406,7 @@ export default function ProductPage() {
                   </Button>
                   
                   <Button 
-                    variant="secondary" 
+                    variant="outline" 
                     className="flex-1"
                     onClick={handleBuyNow}
                     disabled={
@@ -454,19 +418,9 @@ export default function ProductPage() {
                   </Button>
                 </div>
                 
-                {/* Wishlist & Share */}
+                {/* Share */}
                 <div className="flex gap-4 pt-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground"
-                    onClick={handleAddToWishlist}
-                  >
-                    <Heart className={`h-4 w-4 mr-2 ${isInWishlist(product?._id || "") ? "fill-red-500 text-red-500" : ""}`} />
-                    {isInWishlist(product?._id || "") ? "Remove from Wishlist" : "Add to Wishlist"}
-                  </Button>
-                  
-                  <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  <Button variant="ghost" size="sm" className="text-ra9ia-900/70 hover:text-ra9ia-900">
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
@@ -474,19 +428,18 @@ export default function ProductPage() {
               </div>
               
               {/* Product Description */}
-              <div className="pt-6 border-t">
-                <p className="text-muted-foreground">{product.description}</p>
+              <div className="pt-6 border-t border-burgundy-100">
+                <p className="text-ra9ia-900/80 leading-relaxed">{product.description}</p>
               </div>
             </div>
           </div>
           
-          {/* Product Details Tabs */}
+          {/* Product Details Tabs (reviews removed) */}
           <div className="mt-16">
             <Tabs defaultValue="details">
               <TabsList className="w-full border-b rounded-none justify-start">
                 <TabsTrigger value="details">Product Details</TabsTrigger>
                 <TabsTrigger value="shipping">Shipping & Returns</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
               </TabsList>
               
               <TabsContent value="details" className="py-6">
@@ -519,42 +472,6 @@ export default function ProductPage() {
                   </p>
                 </div>
               </TabsContent>
-              
-              <TabsContent value="reviews" className="py-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium">Customer Reviews</h3>
-                    <Button variant="outline">Write a Review</Button>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <div className="flex">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-5 w-5 ${
-                            i < Math.floor(product.rating)
-                              ? "text-amber-500 fill-amber-500"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-lg font-medium">{product.rating.toFixed(1)}</span>
-                    <span className="text-muted-foreground">
-                      ({product.reviewCount} {product.reviewCount === 1 ? "review" : "reviews"})
-                    </span>
-                  </div>
-                  
-                  {product.reviewCount > 0 ? (
-                    <p className="text-muted-foreground">Review content would appear here.</p>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No reviews yet. Be the first to review this product!</p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
             </Tabs>
           </div>
         </div>
@@ -573,7 +490,12 @@ export default function ProductPage() {
           size: selectedSize || undefined,
           image: product.images && product.images.length > 0 
             ? urlFor(product.images[0]).width(100).height(100).url() 
-            : undefined
+            : undefined,
+          slug: product.slug?.current,
+          partnerMessaging: product.isPartnerProduct && product.partner?.messaging ? {
+            telegramUsername: product.partner.messaging.telegramUsername || undefined,
+            whatsappNumber: product.partner.messaging.whatsappNumber || undefined,
+          } : undefined
         }]}
         telegramUsername="ra9ia_collection" // Replace with your actual Telegram username
       />
