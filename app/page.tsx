@@ -35,13 +35,13 @@ export default async function Home() {
         {/* Hero */}
         <section className="relative w-full overflow-hidden">
           <div className="relative h-[68vh] md:h-auto md:aspect-[16/9] bg-cream-50">
-            {/* Use picture for broad compatibility: WebP first, fallback to JPEG */}
+            {/* Use picture for broad compatibility: WebP first, fallback to PNG */}
             <picture>
               <source srcSet="/images/hero.webp" type="image/webp" />
-              {/* Fall back to the existing JPEG until an alt JPG is uploaded */}
+              {/* Fall back to PNG */}
               <img
-                src="/images/hero-desert.jpeg"
-                alt="Ra9ia Editorial — Abayas from UAE, brought to Ethiopia"
+                src="/images/hero.png"
+                alt="Ra9ia Editorial — Abayas & Mukhawirs from UAE, brought to Ethiopia"
                 className="absolute inset-0 h-full w-full object-cover md:object-contain object-[88%_50%] sm:object-[84%_50%] md:object-center"
                 loading="eager"
               />
@@ -54,10 +54,10 @@ export default async function Home() {
                     <div className="wall-placard max-w-[52ch] pr-[28vw] sm:pr-[24vw] md:pr-0">
                       <p className="text-[11px] uppercase tracking-[0.2em] text-ra9ia-900/70">Ra9ia Collection</p>
                       <h1 className="mt-2 text-4xl md:text-6xl font-serif tracking-tight text-ra9ia-900 leading-[1.05]">
-                        Abayas from UAE, brought to Ethiopia
+                        Elegant Modest Fashion for Every Occasion
                       </h1>
                       <p className="mt-3 text-base md:text-lg text-ra9ia-900/85 max-w-[45ch]">
-                        Simple, elegant abayas and modest wear handpicked from UAE brands. Order easily on Telegram.
+                        Curated abayas, mukhawirs, and modest essentials — sourced globally, delivered locally.
                       </p>
                       <div className="mt-5 flex gap-2">
                         <Link href="/collections" prefetch>
