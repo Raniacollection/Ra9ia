@@ -1,72 +1,5 @@
 import { groq } from "next-sanity"
-
-export const productQuery = groq`*[_type == "product" && _id == $id][0] {
-  _id,
-  name,
-  "slug": slug.current,
-  "images": images[].asset->url,
-  price,
-  description,
-  details,
-  colors[] {
-    name,
-    value,
-    stockQuantity
-  },
-  sizes,
-  "category": category->{
-    name,
-    "slug": slug.current
-  },
-  "collection": collection->{
-    name,
-    "slug": slug.current
-  },
-  inventoryManagement {
-    trackInventory,
-    totalStock,
-    lowStockThreshold,
-    showRemainingStock
-  },
-  isNewArrival,
-  isBestseller,
-  rating,
-  reviewCount
-}`
-
-export const bestsellersQuery = groq`*[_type == "product" && isBestseller == true] {
-  _id,
-  name,
-  "slug": slug.current,
-  "image": images[0].asset->url,
-  price,
-  description,
-  isPartnerProduct,
-  "partner": partner->{
-    _id,
-    name,
-    "slug": slug.current,
-    messaging
-  },
-  colors[] {
-    name,
-    value,
-    stockQuantity
-  },
-  sizes,
-  inventoryManagement {
-    trackInventory,
-    totalStock,
-    lowStockThreshold,
-    showRemainingStock
-  },
-  "category": category->name,
-  "collection": collection->name,
-  isNewArrival,
-  isBestseller,
-  rating,
-  reviewCount
-}`
+import { client } from "./client"
 
 export const collectionQuery = groq`
   *[_type == "collection" && slug.current == $slug][0] {
@@ -153,16 +86,68 @@ export const pageQuery = groq`
   }
 `
 
-export const siteSettingsQuery = groq`
-  *[_type == "siteSettings"][0] {
-    title,
-    description,
-    logo,
-    heroImage,
-    heroText,
-    socialLinks,
-    contactInfo,
-    shippingInfo,
-    seo
-  }
-` 
+export const productsQuery = groq`*[_type == "product"] {
+  _id,
+  name,
+  "slug": slug.current,
+  "image": images[0].asset->url,
+  price,
+  description,
+  isPartnerProduct,
+  "partner": partner->{
+    _id,
+    name,
+    "slug": slug.current,
+    messaging
+  },
+  colors[] {
+    name,
+    value,
+    stockQuantity
+  },
+  sizes,
+  inventoryManagement {
+    trackInventory,
+    totalStock,
+    lowStockThreshold,
+    showRemainingStock
+  },
+  "category": category->name,
+  "collection": collection->name,
+  isNewArrival,
+  isBestseller
+}`
+
+export const bestsellersQuery = groq`*[_type == "product" && isBestseller == true] {
+  _id,
+  name,
+  "slug": slug.current,
+  "image": images[0].asset->url,
+  price,
+  description,
+  isPartnerProduct,
+  "partner": partner->{
+    _id,
+    name,
+    "slug": slug.current,
+    messaging
+  },
+  colors[] {
+    name,
+    value,
+    stockQuantity
+  },
+  sizes,
+  inventoryManagement {
+    trackInventory,
+    totalStock,
+    lowStockThreshold,
+    showRemainingStock
+  },
+  "category": category->name,
+  "collection": collection->name,
+  isNewArrival,
+  isBestseller,
+  rating,
+  reviewCount
+}`
